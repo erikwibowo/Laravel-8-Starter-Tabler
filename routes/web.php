@@ -24,7 +24,9 @@ Route::get('admin/login', function () {
         session()->flash('type', 'success');
         return redirect(route('admin.dashboard'));
     }
-    return view('admin.login');
+    return view('admin.login', [
+        'title'     => 'Login'
+    ]);
 })->name('admin.login');
 
 Route::post('admin/auth', [AdminController::class, 'auth'])->name('admin.auth');
@@ -40,5 +42,9 @@ Route::prefix('/admin')->middleware(['adminauth'])->group(function () {
     })->name('admin.dashboard');
 
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
+    Route::post('/admin', [AdminController::class, 'create'])->name('admin.create');
+    Route::put('/admin', [AdminController::class, 'update'])->name('admin.update');
+    Route::delete('/admin', [AdminController::class, 'delete'])->name('admin.delete');
+    Route::post('/admin/data', [AdminController::class, 'data'])->name('admin.data');
     
 });

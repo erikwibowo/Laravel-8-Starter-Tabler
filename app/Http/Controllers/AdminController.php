@@ -10,12 +10,99 @@ use Illuminate\Support\Facades\Validator;
 class AdminController extends Controller
 {
     public function index(){
-        session()->flash('type', 'success');
-        session()->flash('notif', 'Data berhasil ditambah');
+        // session()->flash('type', 'success');
+        // session()->flash('notif', 'Data berhasil ditambah');
         return view('admin.admin', [
             'title'     => 'Admin',
             'data'      => Admin::latest()->get()
         ]);
+    }
+
+    public function create(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required',
+            'email' => 'required|email|unique:admins',
+            'phone' => 'required',
+            'address' => 'required',
+            'password' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect(route('admin.index'))
+            ->withErrors($validator)
+                ->withInput();
+        }
+        Admin::create([
+            'name'      => $request->name,
+            'email'     => $request->email,
+            'phone'     => $request->phone,
+            'email'     => $request->email,
+            'address'   => $request->address,
+            'password'  => Hash::make($request->password)
+        ]);
+        session()->flash('type', 'success');
+        session()->flash('notif', 'Data berhasil ditambah');
+        return redirect(route('admin.index'));
+    }
+
+    public function update(Request $request)
+    {
+        if ($request->email != $request->email_old) {
+            $validator = Validator::make($request->all(), [
+                'name' => 'required',
+                'email' => 'required|email|unique:admins',
+                'phone' => 'required',
+                'address' => 'required',
+            ]);
+        }else{
+            $validator = Validator::make($request->all(), [
+                'name' => 'required',
+                'phone' => 'required',
+                'address' => 'required',
+            ]);
+        }
+
+        if ($validator->fails()) {
+            return redirect(route('admin.index'))
+            ->withErrors($validator)
+                ->withInput();
+        }
+
+        if (empty($request->password)) {
+            $data = [
+                'name'      => $request->name,
+                'email'     => $request->email,
+                'phone'     => $request->phone,
+                'email'     => $request->email,
+                'address'   => $request->address
+            ];
+        }else{
+            $data = [
+                'name'      => $request->name,
+                'email'     => $request->email,
+                'phone'     => $request->phone,
+                'email'     => $request->email,
+                'address'   => $request->address,
+                'password'  => Hash::make($request->password)
+            ];
+        }
+
+        Admin::where(['id' => $request->id])->update($data);
+        session()->flash('type', 'success');
+        session()->flash('notif', 'Data berhasil disimpan');
+        return redirect(route('admin.index'));
+    }
+
+    public function data(Request $request){
+        echo json_encode(Admin::where(['id' => $request->id])->first());
+    }
+
+    public function delete(Request $request){
+        Admin::where(['id' => $request->id])->delete();
+        session()->flash('type', 'success');
+        session()->flash('notif', 'Data berhasil dihapus');
+        return redirect(route('admin.index'));
     }
 
     public function auth(Request $request){
